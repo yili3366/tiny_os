@@ -1,0 +1,643 @@
+Disassembly of section .text:
+
+00000000 <disk_address_packet-0x2>:
+   0:	eb 3d                	jmp    3f <LABEL_START>
+
+00000002 <disk_address_packet>:
+   2:	10 00                	adc    %al,(%eax)
+
+00000004 <sect_cnt>:
+   4:	02 00                	add    (%eax),%al
+   6:	00 00                	add    %al,(%eax)
+   8:	00 70 00             	add    %dh,0x0(%eax)
+
+0000000a <lba_addr>:
+	...
+
+00000012 <LABEL_GDT>:
+	...
+
+0000001a <LABEL_DESC_FLAT_C>:
+  1a:	ff                   	(bad)  
+  1b:	ff 00                	incl   (%eax)
+  1d:	00 00                	add    %al,(%eax)
+  1f:	9a cf 00 ff ff 00 00 	lcall  $0x0,$0xffff00cf
+
+00000022 <LABEL_DESC_FLAT_RW>:
+  22:	ff                   	(bad)  
+  23:	ff 00                	incl   (%eax)
+  25:	00 00                	add    %al,(%eax)
+  27:	92                   	xchg   %eax,%edx
+  28:	cf                   	iret   
+	...
+
+0000002a <LABEL_DESC_VIDEO>:
+  2a:	ff                   	(bad)  
+  2b:	ff 00                	incl   (%eax)
+  2d:	80 0b f2             	orb    $0xf2,(%ebx)
+	...
+
+00000032 <GdtPtr>:
+  32:	1f                   	pop    %ds
+  33:	00 12                	add    %dl,(%edx)
+  35:	00 09                	add    %cl,(%ecx)
+	...
+
+00000038 <err>:
+  38:	b6 05                	mov    $0x5,%dh
+  3a:	e8 41 01 eb fe       	call   feeb0180 <PAGE_TBL_BASE+0xfedaf180>
+
+0000003f <LABEL_START>:
+  3f:	8c c8                	mov    %cs,%eax
+  41:	8e d8                	mov    %eax,%ds
+  43:	8e c0                	mov    %eax,%es
+  45:	8e d0                	mov    %eax,%ss
+  47:	bc 00 01 b6 00       	mov    $0xb60100,%esp
+  4c:	e8 2f 01 66 31       	call   31660180 <PAGE_TBL_BASE+0x3155f180>
+  51:	db bf fc 04 66 b8    	fstpt  -0x4799fb04(%edi)
+
+00000055 <BEGIN_loop>:
+  55:	66 b8 20 e8          	mov    $0xe820,%ax
+  59:	00 00                	add    %al,(%eax)
+  5b:	66 b9 14 00          	mov    $0x14,%cx
+  5f:	00 00                	add    %al,(%eax)
+  61:	66 ba 50 41          	mov    $0x4150,%dx
+  65:	4d                   	dec    %ebp
+  66:	53                   	push   %ebx
+  67:	cd 15                	int    $0x15
+  69:	72 10                	jb     7b <BEGIN_getAMfail>
+  6b:	83 c7 14             	add    $0x14,%edi
+  6e:	66 ff 06             	incw   (%esi)
+  71:	dc 04 66             	faddl  (%esi,%eiz,2)
+  74:	83 fb 00             	cmp    $0x0,%ebx
+  77:	75 dc                	jne    55 <BEGIN_loop>
+  79:	eb 09                	jmp    84 <BEGIN_getAMok>
+
+0000007b <BEGIN_getAMfail>:
+  7b:	66 c7 06 dc 04       	movw   $0x4dc,(%esi)
+  80:	00 00                	add    %al,(%eax)
+	...
+
+00000084 <BEGIN_getAMok>:
+  84:	64 66 a1 1c 00 e8 2d 	mov    %fs:0x2de8001c,%ax
+  8b:	01 66 a3             	add    %esp,-0x5d(%esi)
+  8e:	0a 00                	or     (%eax),%al
+  90:	e8 07 01 be 2e       	call   2ebe019c <PAGE_TBL_BASE+0x2eadf19c>
+  95:	01 53 64             	add    %edx,0x64(%ebx)
+
+00000097 <str_cmp>:
+  97:	64 03 1e             	add    %fs:(%esi),%ebx
+  9a:	34 00                	xor    $0x0,%al
+  9c:	ac                   	lods   %ds:(%esi),%al
+  9d:	26 3a 07             	cmp    %es:(%edi),%al
+  a0:	74 02                	je     a4 <str_cmp+0xd>
+  a2:	eb 07                	jmp    ab <different>
+  a4:	3c 00                	cmp    $0x0,%al
+  a6:	74 1e                	je     c6 <found>
+  a8:	43                   	inc    %ebx
+  a9:	eb f1                	jmp    9c <str_cmp+0x5>
+
+000000ab <different>:
+  ab:	5b                   	pop    %ebx
+  ac:	64 03 1e             	add    %fs:(%esi),%ebx
+  af:	2c 00                	sub    $0x0,%al
+  b1:	64 66 2b 0e          	sub    %fs:(%esi),%cx
+  b5:	2c 00                	sub    $0x0,%al
+  b7:	74 06                	je     bf <not_found>
+  b9:	53                   	push   %ebx
+  ba:	be 2e 01 eb d8       	mov    $0xd8eb012e,%esi
+
+000000bf <not_found>:
+  bf:	b6 03                	mov    $0x3,%dh
+  c1:	e8 ba 00 eb fe       	call   feeb0180 <PAGE_TBL_BASE+0xfedaf180>
+
+000000c6 <found>:
+  c6:	5b                   	pop    %ebx
+  c7:	64 03 1e             	add    %fs:(%esi),%ebx
+  ca:	30 00                	xor    %al,(%eax)
+  cc:	26 66 8b 07          	mov    %es:(%edi),%ax
+  d0:	e8 e6 00 66 a3       	call   a36601bb <PAGE_TBL_BASE+0xa355f1bb>
+  d5:	0a 00                	or     (%eax),%al
+
+000000d7 <load_kernel>:
+  d7:	e8 c0 00 66 81       	call   8166019c <PAGE_TBL_BASE+0x8155f19c>
+  dc:	f9                   	stc    
+  dd:	00 04 00             	add    %al,(%eax,%eax,1)
+  e0:	00 7c 1f 66          	add    %bh,0x66(%edi,%ebx,1)
+  e4:	81 e9 00 04 00 00    	sub    $0x400,%ecx
+  ea:	81 06 06 00 00 04    	addl   $0x4000006,(%esi)
+  f0:	72 02                	jb     f4 <load_kernel+0x1d>
+  f2:	eb 06                	jmp    fa <load_kernel+0x23>
+  f4:	81 06 08 00 00 10    	addl   $0x10000008,(%esi)
+  fa:	66 83 06 0a          	addw   $0xa,(%esi)
+  fe:	00 02                	add    %al,(%edx)
+ 100:	eb d5                	jmp    d7 <load_kernel>
+
+00000102 <done>:
+ 102:	b6 02                	mov    $0x2,%dh
+ 104:	e8 77 00 0f 01       	call   10f0180 <PAGE_TBL_BASE+0xfef180>
+ 109:	16                   	push   %ss
+ 10a:	32 00                	xor    (%eax),%al
+ 10c:	fa                   	cli    
+ 10d:	e4 92                	in     $0x92,%al
+ 10f:	0c 02                	or     $0x2,%al
+ 111:	e6 92                	out    %al,$0x92
+ 113:	0f 20 c0             	mov    %cr0,%eax
+ 116:	66 83 c8 01          	or     $0x1,%ax
+ 11a:	0f 22 c0             	mov    %eax,%cr0
+ 11d:	66 ea 20 02 09 00    	ljmpw  $0x9,$0x220
+ 123:	08 00                	or     %al,(%eax)
+ 125:	eb fe                	jmp    125 <done+0x23>
+
+00000127 <wSectorNo>:
+	...
+
+00000129 <bOdd>:
+	...
+
+0000012a <dwKernelSize>:
+ 12a:	00 00                	add    %al,(%eax)
+	...
+
+0000012e <KernelFileName>:
+ 12e:	6b 65 72 6e          	imul   $0x6e,0x72(%ebp),%esp
+ 132:	65                   	gs
+ 133:	6c                   	insb   (%dx),%es:(%edi)
+ 134:	2e 62 69 6e          	bound  %ebp,%cs:0x6e(%ecx)
+	...
+
+00000139 <LoadMessage>:
+ 139:	4c                   	dec    %esp
+ 13a:	6f                   	outsl  %ds:(%esi),(%dx)
+ 13b:	61                   	popa   
+ 13c:	64 69 6e 67 20 20 20 	imul   $0x20202020,%fs:0x67(%esi),%ebp
+ 143:	20 
+
+00000142 <Message1>:
+ 142:	20 20                	and    %ah,(%eax)
+ 144:	20 20                	and    %ah,(%eax)
+ 146:	20 20                	and    %ah,(%eax)
+ 148:	20 20                	and    %ah,(%eax)
+ 14a:	20 69 6e             	and    %ch,0x6e(%ecx)
+
+0000014b <Message2>:
+ 14b:	69 6e 20 48 44 20 4c 	imul   $0x4c204448,0x20(%esi),%ebp
+ 152:	44                   	inc    %esp
+ 153:	52                   	push   %edx
+
+00000154 <Message3>:
+ 154:	4e                   	dec    %esi
+ 155:	6f                   	outsl  %ds:(%esi),(%dx)
+ 156:	20 4b 45             	and    %cl,0x45(%ebx)
+ 159:	52                   	push   %edx
+ 15a:	4e                   	dec    %esi
+ 15b:	45                   	inc    %ebp
+ 15c:	4c                   	dec    %esp
+
+0000015d <Message4>:
+ 15d:	54                   	push   %esp
+ 15e:	6f                   	outsl  %ds:(%esi),(%dx)
+ 15f:	6f                   	outsl  %ds:(%esi),(%dx)
+ 160:	20 4c 61 72          	and    %cl,0x72(%ecx,%eiz,2)
+ 164:	67                   	addr16
+ 165:	65                   	gs
+
+00000166 <Message5>:
+ 166:	45                   	inc    %ebp
+ 167:	72 72                	jb     1db <get_inode+0x22>
+ 169:	6f                   	outsl  %ds:(%esi),(%dx)
+ 16a:	72 20                	jb     18c <real_mode_disp_str+0xe>
+ 16c:	30 20                	xor    %ah,(%eax)
+ 16e:	20 b8 00 06 bb 00    	and    %bh,0xbb0600(%eax)
+
+0000016f <clear_screen>:
+ 16f:	b8 00 06 bb 00       	mov    $0xbb0600,%eax
+ 174:	07                   	pop    %es
+ 175:	b9 00 00 ba 4f       	mov    $0x4fba0000,%ecx
+ 17a:	18 cd                	sbb    %cl,%ch
+ 17c:	10 c3                	adc    %al,%bl
+
+0000017e <real_mode_disp_str>:
+ 17e:	b8 09 00 f6 e6       	mov    $0xe6f60009,%eax
+ 183:	05 39 01 89 c5       	add    $0xc5890139,%eax
+ 188:	8c d8                	mov    %ds,%eax
+ 18a:	8e c0                	mov    %eax,%es
+ 18c:	b9 09 00 b8 01       	mov    $0x1b80009,%ecx
+ 191:	13 bb 07 00 b2 00    	adc    0xb20007(%ebx),%edi
+ 197:	cd 10                	int    $0x10
+ 199:	c3                   	ret    
+
+0000019a <read_sector>:
+ 19a:	66 31 db             	xor    %bx,%bx
+ 19d:	66 c7 06 0e 00       	movw   $0xe,(%esi)
+ 1a2:	00 00                	add    %al,(%eax)
+ 1a4:	00 00                	add    %al,(%eax)
+ 1a6:	b4 42                	mov    $0x42,%ah
+ 1a8:	b2 80                	mov    $0x80,%dl
+ 1aa:	be 02 00 cd 0d       	mov    $0xdcd0002,%esi
+ 1af:	a1 08 00 8e c0       	mov    0xc08e0008,%eax
+ 1b4:	8b 1e                	mov    (%esi),%ebx
+ 1b6:	06                   	push   %es
+ 1b7:	00 c3                	add    %al,%bl
+
+000001b9 <get_inode>:
+ 1b9:	66 48                	dec    %ax
+ 1bb:	64 8a 1e             	mov    %fs:(%esi),%bl
+ 1be:	20 00                	and    %al,(%eax)
+ 1c0:	f6 e3                	mul    %bl
+ 1c2:	66 ba 00 04          	mov    $0x400,%dx
+ 1c6:	00 00                	add    %al,(%eax)
+ 1c8:	64 66 2b 16          	sub    %fs:(%esi),%dx
+ 1cc:	20 00                	and    %al,(%eax)
+ 1ce:	66 39 d0             	cmp    %dx,%ax
+ 1d1:	0f 8f 63 fe 66 50    	jg     5067003a <PAGE_TBL_BASE+0x5056f03a>
+ 1d7:	64 66 8b 1e          	mov    %fs:(%esi),%bx
+ 1db:	0c 00                	or     $0x0,%al
+ 1dd:	64 66 8b 16          	mov    %fs:(%esi),%dx
+ 1e1:	10 00                	adc    %al,(%eax)
+ 1e3:	67 66 8d 84 13 01    	addr16 lea 0x113(%si),%ax
+ 1e9:	4f                   	dec    %edi
+ 1ea:	00 00                	add    %al,(%eax)
+ 1ec:	66 a3 0a 00 e8 a7    	mov    %ax,0xa7e8000a
+ 1f2:	ff 66 58             	jmp    *0x58(%esi)
+ 1f5:	64 66 8b 16          	mov    %fs:(%esi),%dx
+ 1f9:	24 00                	and    $0x0,%al
+ 1fb:	66 01 da             	add    %bx,%dx
+ 1fe:	66 01 c2             	add    %ax,%dx
+ 201:	26 67 66 8b 0a       	addr16 mov %es:(%bp,%si),%cx
+ 206:	64 03 06             	add    %fs:(%esi),%eax
+ 209:	28 00                	sub    %al,(%eax)
+ 20b:	01 c3                	add    %eax,%ebx
+ 20d:	26 66 8b 07          	mov    %es:(%edi),%ax
+ 211:	66 05 ff 4e          	add    $0x4eff,%ax
+ 215:	00 00                	add    %al,(%eax)
+ 217:	c3                   	ret    
+ 218:	90                   	nop
+ 219:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi
+
+00000220 <LABEL_PM_START>:
+ 220:	66 b8 1b 00          	mov    $0x1b,%ax
+ 224:	8e e8                	mov    %eax,%gs
+ 226:	66 b8 10 00          	mov    $0x10,%ax
+ 22a:	8e d8                	mov    %eax,%ds
+ 22c:	8e c0                	mov    %eax,%es
+ 22e:	8e e0                	mov    %eax,%fs
+ 230:	8e d0                	mov    %eax,%ss
+ 232:	bc fc 09 09 00       	mov    $0x909fc,%esp
+ 237:	e8 27 01 00 00       	call   363 <DispMemInfo>
+ 23c:	e8 a5 01 00 00       	call   3e6 <SetupPaging>
+ 241:	e8 05 02 00 00       	call   44b <InitKernel>
+ 246:	66 c7 05 00 09 00 00 	movw   $0xb007,0x900
+ 24d:	07 b0 
+ 24f:	a1 e4 04 09 00       	mov    0x904e4,%eax
+ 254:	a3 04 09 00 00       	mov    %eax,0x904
+ 259:	b8 00 70 00 00       	mov    $0x7000,%eax
+ 25e:	c1 e0 04             	shl    $0x4,%eax
+ 261:	83 c0 00             	add    $0x0,%eax
+ 264:	a3 08 09 00 00       	mov    %eax,0x908
+ 269:	ea 00 10 00 00 08 00 	ljmp   $0x8,$0x1000
+
+00000270 <DispAL>:
+ 270:	51                   	push   %ecx
+ 271:	52                   	push   %edx
+ 272:	57                   	push   %edi
+ 273:	8b 3d e0 04 09 00    	mov    0x904e0,%edi
+ 279:	b4 0f                	mov    $0xf,%ah
+ 27b:	88 c2                	mov    %al,%dl
+ 27d:	c0 e8 04             	shr    $0x4,%al
+ 280:	b9 02 00 00 00       	mov    $0x2,%ecx
+
+00000285 <DispAL_begin>:
+ 285:	24 0f                	and    $0xf,%al
+ 287:	3c 09                	cmp    $0x9,%al
+ 289:	77 04                	ja     28f <DispAL_1>
+ 28b:	04 30                	add    $0x30,%al
+ 28d:	eb 04                	jmp    293 <DispAL_2>
+
+0000028f <DispAL_1>:
+ 28f:	2c 0a                	sub    $0xa,%al
+ 291:	04 41                	add    $0x41,%al
+
+00000293 <DispAL_2>:
+ 293:	65 66 89 07          	mov    %ax,%gs:(%edi)
+ 297:	83 c7 02             	add    $0x2,%edi
+ 29a:	88 d0                	mov    %dl,%al
+ 29c:	e2 e7                	loop   285 <DispAL_begin>
+ 29e:	89 3d e0 04 09 00    	mov    %edi,0x904e0
+ 2a4:	5f                   	pop    %edi
+ 2a5:	5a                   	pop    %edx
+ 2a6:	59                   	pop    %ecx
+ 2a7:	c3                   	ret    
+
+000002a8 <DispInt>:
+ 2a8:	8b 44 24 04          	mov    0x4(%esp),%eax
+ 2ac:	c1 e8 18             	shr    $0x18,%eax
+ 2af:	e8 bc ff ff ff       	call   270 <DispAL>
+ 2b4:	8b 44 24 04          	mov    0x4(%esp),%eax
+ 2b8:	c1 e8 10             	shr    $0x10,%eax
+ 2bb:	e8 b0 ff ff ff       	call   270 <DispAL>
+ 2c0:	8b 44 24 04          	mov    0x4(%esp),%eax
+ 2c4:	c1 e8 08             	shr    $0x8,%eax
+ 2c7:	e8 a4 ff ff ff       	call   270 <DispAL>
+ 2cc:	8b 44 24 04          	mov    0x4(%esp),%eax
+ 2d0:	e8 9b ff ff ff       	call   270 <DispAL>
+ 2d5:	b4 07                	mov    $0x7,%ah
+ 2d7:	b0 68                	mov    $0x68,%al
+ 2d9:	57                   	push   %edi
+ 2da:	8b 3d e0 04 09 00    	mov    0x904e0,%edi
+ 2e0:	65 66 89 07          	mov    %ax,%gs:(%edi)
+ 2e4:	83 c7 04             	add    $0x4,%edi
+ 2e7:	89 3d e0 04 09 00    	mov    %edi,0x904e0
+ 2ed:	5f                   	pop    %edi
+ 2ee:	c3                   	ret    
+
+000002ef <DispStr>:
+ 2ef:	55                   	push   %ebp
+ 2f0:	89 e5                	mov    %esp,%ebp
+ 2f2:	53                   	push   %ebx
+ 2f3:	56                   	push   %esi
+ 2f4:	57                   	push   %edi
+ 2f5:	8b 75 08             	mov    0x8(%ebp),%esi
+ 2f8:	8b 3d e0 04 09 00    	mov    0x904e0,%edi
+ 2fe:	b4 0f                	mov    $0xf,%ah
+
+00000300 <DispStr_1>:
+ 300:	ac                   	lods   %ds:(%esi),%al
+ 301:	84 c0                	test   %al,%al
+ 303:	74 23                	je     328 <DispStr_2>
+ 305:	3c 0a                	cmp    $0xa,%al
+ 307:	75 16                	jne    31f <DispStr_3>
+ 309:	50                   	push   %eax
+ 30a:	89 f8                	mov    %edi,%eax
+ 30c:	b3 a0                	mov    $0xa0,%bl
+ 30e:	f6 f3                	div    %bl
+ 310:	25 ff 00 00 00       	and    $0xff,%eax
+ 315:	40                   	inc    %eax
+ 316:	b3 a0                	mov    $0xa0,%bl
+ 318:	f6 e3                	mul    %bl
+ 31a:	89 c7                	mov    %eax,%edi
+ 31c:	58                   	pop    %eax
+ 31d:	eb e1                	jmp    300 <DispStr_1>
+
+0000031f <DispStr_3>:
+ 31f:	65 66 89 07          	mov    %ax,%gs:(%edi)
+ 323:	83 c7 02             	add    $0x2,%edi
+ 326:	eb d8                	jmp    300 <DispStr_1>
+
+00000328 <DispStr_2>:
+ 328:	89 3d e0 04 09 00    	mov    %edi,0x904e0
+ 32e:	5f                   	pop    %edi
+ 32f:	5e                   	pop    %esi
+ 330:	5b                   	pop    %ebx
+ 331:	5d                   	pop    %ebp
+ 332:	c3                   	ret    
+
+00000333 <DispLF>:
+ 333:	68 da 04 09 00       	push   $0x904da
+ 338:	e8 b2 ff ff ff       	call   2ef <DispStr>
+ 33d:	83 c4 04             	add    $0x4,%esp
+ 340:	c3                   	ret    
+
+00000341 <MemCpy>:
+ 341:	55                   	push   %ebp
+ 342:	89 e5                	mov    %esp,%ebp
+ 344:	56                   	push   %esi
+ 345:	57                   	push   %edi
+ 346:	51                   	push   %ecx
+ 347:	8b 7d 08             	mov    0x8(%ebp),%edi
+ 34a:	8b 75 0c             	mov    0xc(%ebp),%esi
+ 34d:	8b 4d 10             	mov    0x10(%ebp),%ecx
+
+00000350 <MemCpy_1>:
+ 350:	83 f9 00             	cmp    $0x0,%ecx
+ 353:	74 04                	je     359 <MemCpy_2>
+ 355:	a4                   	movsb  %ds:(%esi),%es:(%edi)
+ 356:	49                   	dec    %ecx
+ 357:	eb f7                	jmp    350 <MemCpy_1>
+
+00000359 <MemCpy_2>:
+ 359:	8b 45 08             	mov    0x8(%ebp),%eax
+ 35c:	59                   	pop    %ecx
+ 35d:	5f                   	pop    %edi
+ 35e:	5e                   	pop    %esi
+ 35f:	89 ec                	mov    %ebp,%esp
+ 361:	5d                   	pop    %ebp
+ 362:	c3                   	ret    
+
+00000363 <DispMemInfo>:
+ 363:	56                   	push   %esi
+ 364:	57                   	push   %edi
+ 365:	51                   	push   %ecx
+ 366:	68 a0 04 09 00       	push   $0x904a0
+ 36b:	e8 7f ff ff ff       	call   2ef <DispStr>
+ 370:	83 c4 04             	add    $0x4,%esp
+ 373:	be fc 04 09 00       	mov    $0x904fc,%esi
+ 378:	8b 0d dc 04 09 00    	mov    0x904dc,%ecx
+
+0000037e <DMS_loop>:
+ 37e:	ba 05 00 00 00       	mov    $0x5,%edx
+ 383:	bf e8 04 09 00       	mov    $0x904e8,%edi
+
+00000388 <DMS_1>:
+ 388:	ff 36                	pushl  (%esi)
+ 38a:	e8 19 ff ff ff       	call   2a8 <DispInt>
+ 38f:	58                   	pop    %eax
+ 390:	ab                   	stos   %eax,%es:(%edi)
+ 391:	83 c6 04             	add    $0x4,%esi
+ 394:	4a                   	dec    %edx
+ 395:	83 fa 00             	cmp    $0x0,%edx
+ 398:	75 ee                	jne    388 <DMS_1>
+ 39a:	e8 94 ff ff ff       	call   333 <DispLF>
+ 39f:	83 3d f8 04 09 00 01 	cmpl   $0x1,0x904f8
+ 3a6:	75 18                	jne    3c0 <DMS_2>
+ 3a8:	a1 e8 04 09 00       	mov    0x904e8,%eax
+ 3ad:	03 05 f0 04 09 00    	add    0x904f0,%eax
+ 3b3:	3b 05 e4 04 09 00    	cmp    0x904e4,%eax
+ 3b9:	72 05                	jb     3c0 <DMS_2>
+ 3bb:	a3 e4 04 09 00       	mov    %eax,0x904e4
+
+000003c0 <DMS_2>:
+ 3c0:	e2 bc                	loop   37e <DMS_loop>
+ 3c2:	e8 6c ff ff ff       	call   333 <DispLF>
+ 3c7:	68 d0 04 09 00       	push   $0x904d0
+ 3cc:	e8 1e ff ff ff       	call   2ef <DispStr>
+ 3d1:	83 c4 04             	add    $0x4,%esp
+ 3d4:	ff 35 e4 04 09 00    	pushl  0x904e4
+ 3da:	e8 c9 fe ff ff       	call   2a8 <DispInt>
+ 3df:	83 c4 04             	add    $0x4,%esp
+ 3e2:	59                   	pop    %ecx
+ 3e3:	5f                   	pop    %edi
+ 3e4:	5e                   	pop    %esi
+ 3e5:	c3                   	ret    
+
+000003e6 <SetupPaging>:
+ 3e6:	31 d2                	xor    %edx,%edx
+ 3e8:	a1 e4 04 09 00       	mov    0x904e4,%eax
+ 3ed:	bb 00 00 40 00       	mov    $0x400000,%ebx
+ 3f2:	f7 f3                	div    %ebx
+ 3f4:	89 c1                	mov    %eax,%ecx
+ 3f6:	85 d2                	test   %edx,%edx
+ 3f8:	74 01                	je     3fb <SP_no_remainder>
+ 3fa:	41                   	inc    %ecx
+
+000003fb <SP_no_remainder>:
+ 3fb:	51                   	push   %ecx
+ 3fc:	66 b8 10 00          	mov    $0x10,%ax
+ 400:	8e c0                	mov    %eax,%es
+ 402:	bf 00 00 10 00       	mov    $0x100000,%edi
+ 407:	31 c0                	xor    %eax,%eax
+ 409:	b8 07 10 10 00       	mov    $0x101007,%eax
+
+0000040e <SP_1>:
+ 40e:	ab                   	stos   %eax,%es:(%edi)
+ 40f:	05 00 10 00 00       	add    $0x1000,%eax
+ 414:	e2 f8                	loop   40e <SP_1>
+ 416:	58                   	pop    %eax
+ 417:	bb 00 04 00 00       	mov    $0x400,%ebx
+ 41c:	f7 e3                	mul    %ebx
+ 41e:	89 c1                	mov    %eax,%ecx
+ 420:	bf 00 10 10 00       	mov    $0x101000,%edi
+ 425:	31 c0                	xor    %eax,%eax
+ 427:	b8 07 00 00 00       	mov    $0x7,%eax
+
+0000042c <SP_2>:
+ 42c:	ab                   	stos   %eax,%es:(%edi)
+ 42d:	05 00 10 00 00       	add    $0x1000,%eax
+ 432:	e2 f8                	loop   42c <SP_2>
+ 434:	b8 00 00 10 00       	mov    $0x100000,%eax
+ 439:	0f 22 d8             	mov    %eax,%cr3
+ 43c:	0f 20 c0             	mov    %cr0,%eax
+ 43f:	0d 00 00 00 80       	or     $0x80000000,%eax
+ 444:	0f 22 c0             	mov    %eax,%cr0
+ 447:	eb 00                	jmp    449 <SP_3>
+
+00000449 <SP_3>:
+ 449:	90                   	nop
+ 44a:	c3                   	ret    
+
+0000044b <InitKernel>:
+ 44b:	31 f6                	xor    %esi,%esi
+ 44d:	66 8b 0d 2c 00 07 00 	mov    0x7002c,%cx
+ 454:	0f b7 c9             	movzwl %cx,%ecx
+ 457:	8b 35 1c 00 07 00    	mov    0x7001c,%esi
+ 45d:	81 c6 00 00 07 00    	add    $0x70000,%esi
+
+00000463 <_Begin>:
+ 463:	8b 06                	mov    (%esi),%eax
+ 465:	83 f8 00             	cmp    $0x0,%eax
+ 468:	74 17                	je     481 <_NoAction>
+ 46a:	ff 76 10             	pushl  0x10(%esi)
+ 46d:	8b 46 04             	mov    0x4(%esi),%eax
+ 470:	05 00 00 07 00       	add    $0x70000,%eax
+ 475:	50                   	push   %eax
+ 476:	ff 76 08             	pushl  0x8(%esi)
+ 479:	e8 c3 fe ff ff       	call   341 <MemCpy>
+ 47e:	83 c4 0c             	add    $0xc,%esp
+
+00000481 <_NoAction>:
+ 481:	83 c6 20             	add    $0x20,%esi
+ 484:	49                   	dec    %ecx
+ 485:	75 dc                	jne    463 <_Begin>
+ 487:	c3                   	ret    
+
+00000488 <LABEL_DATA>:
+ 488:	eb 16                	jmp    4a0 <_szMemChkTitle>
+ 48a:	90                   	nop
+ 48b:	90                   	nop
+ 48c:	90                   	nop
+ 48d:	90                   	nop
+ 48e:	90                   	nop
+ 48f:	90                   	nop
+ 490:	90                   	nop
+ 491:	90                   	nop
+ 492:	90                   	nop
+ 493:	90                   	nop
+ 494:	90                   	nop
+ 495:	90                   	nop
+ 496:	90                   	nop
+ 497:	90                   	nop
+ 498:	90                   	nop
+ 499:	90                   	nop
+ 49a:	90                   	nop
+ 49b:	90                   	nop
+ 49c:	90                   	nop
+ 49d:	90                   	nop
+ 49e:	90                   	nop
+ 49f:	90                   	nop
+
+000004a0 <_szMemChkTitle>:
+ 4a0:	42                   	inc    %edx
+ 4a1:	61                   	popa   
+ 4a2:	73 65                	jae    509 <_MemChkBuf+0xd>
+ 4a4:	41                   	inc    %ecx
+ 4a5:	64                   	fs
+ 4a6:	64                   	fs
+ 4a7:	72 4c                	jb     4f5 <_dwLengthHigh+0x1>
+ 4a9:	20 42 61             	and    %al,0x61(%edx)
+ 4ac:	73 65                	jae    513 <_MemChkBuf+0x17>
+ 4ae:	41                   	inc    %ecx
+ 4af:	64                   	fs
+ 4b0:	64                   	fs
+ 4b1:	72 48                	jb     4fb <_dwType+0x3>
+ 4b3:	20 4c 65 6e          	and    %cl,0x6e(%ebp,%eiz,2)
+ 4b7:	67 74 68             	addr16 je 522 <_MemChkBuf+0x26>
+ 4ba:	4c                   	dec    %esp
+ 4bb:	6f                   	outsl  %ds:(%esi),(%dx)
+ 4bc:	77 20                	ja     4de <_dwMCRNumber+0x2>
+ 4be:	4c                   	dec    %esp
+ 4bf:	65 6e                	outsb  %gs:(%esi),(%dx)
+ 4c1:	67 74 68             	addr16 je 52c <_MemChkBuf+0x30>
+ 4c4:	48                   	dec    %eax
+ 4c5:	69 67 68 20 20 54 79 	imul   $0x79542020,0x68(%edi),%esp
+ 4cc:	70 65                	jo     533 <_MemChkBuf+0x37>
+ 4ce:	0a 00                	or     (%eax),%al
+
+000004d0 <_szRAMSize>:
+ 4d0:	52                   	push   %edx
+ 4d1:	41                   	inc    %ecx
+ 4d2:	4d                   	dec    %ebp
+ 4d3:	20 53 69             	and    %dl,0x69(%ebx)
+ 4d6:	7a 65                	jp     53d <_MemChkBuf+0x41>
+ 4d8:	3a 00                	cmp    (%eax),%al
+
+000004da <_szReturn>:
+ 4da:	0a 00                	or     (%eax),%al
+
+000004dc <_dwMCRNumber>:
+ 4dc:	00 00                	add    %al,(%eax)
+	...
+
+000004e0 <_dwDispPos>:
+ 4e0:	60                   	pusha  
+ 4e1:	04 00                	add    $0x0,%al
+	...
+
+000004e4 <_dwMemSize>:
+ 4e4:	00 00                	add    %al,(%eax)
+	...
+
+000004e8 <_ARDStruct>:
+ 4e8:	00 00                	add    %al,(%eax)
+	...
+
+000004ec <_dwBaseAddrHigh>:
+ 4ec:	00 00                	add    %al,(%eax)
+	...
+
+000004f0 <_dwLengthLow>:
+ 4f0:	00 00                	add    %al,(%eax)
+	...
+
+000004f4 <_dwLengthHigh>:
+ 4f4:	00 00                	add    %al,(%eax)
+	...
+
+000004f8 <_dwType>:
+ 4f8:	00 00                	add    %al,(%eax)
+	...
+
+000004fc <_MemChkBuf>:
+	...
+
+000005fc <StackSpace>:
+	...

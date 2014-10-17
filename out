@@ -1,0 +1,37 @@
+rm -fr *.bin *.elf */*.o */*.elf */*.bin 
+as -I boot/include/ -o boot/boot.o boot/boot.S
+ld -Lboot boot/boot.o -s -o boot/boot.elf -T i386_boot.lds
+objcopy -R .pdr -R .comment -R .note -S -O binary boot/boot.elf boot/boot.bin
+as -I boot/include/ -o boot/loader.o boot/loader.S
+ld -Lboot boot/loader.o -s -o boot/loader.elf -T i386_dos.lds
+objcopy -R .pdr -R .comment -R .note -S -O binary boot/loader.elf boot/loader.bin
+as -I include/ -I include/sys/ -o kernel/kernel.o kernel/kernel.S
+gcc -I include/ -I include/sys/ -c -fno-builtin -o kernel/start.o kernel/start.c
+In file included from kernel/start.c:15:
+include/sys/global.h:14: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘int’
+include/sys/global.h:16: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘int’
+include/sys/global.h:18: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘u8’
+include/sys/global.h:19: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘struct’
+include/sys/global.h:20: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘u8’
+include/sys/global.h:21: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘struct’
+include/sys/global.h:23: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘u32’
+include/sys/global.h:24: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘int’
+include/sys/global.h:26: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘int’
+include/sys/global.h:32: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘struct’
+include/sys/global.h:33: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘struct’
+include/sys/global.h:44: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘MESSAGE’
+include/sys/global.h:47: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘int’
+include/sys/global.h:50: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘struct’
+include/sys/global.h:51: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘struct’
+include/sys/global.h:52: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘struct’
+include/sys/global.h:55: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘MESSAGE’
+include/sys/global.h:56: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘struct’
+include/sys/global.h:57: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘struct’
+kernel/start.c: In function ‘cstart’:
+kernel/start.c:27: error: ‘gdt’ undeclared (first use in this function)
+kernel/start.c:27: error: (Each undeclared identifier is reported only once
+kernel/start.c:27: error: for each function it appears in.)
+kernel/start.c:28: error: ‘gdt_ptr’ undeclared (first use in this function)
+kernel/start.c:38: error: ‘idt_ptr’ undeclared (first use in this function)
+kernel/start.c:41: error: ‘idt’ undeclared (first use in this function)
+make: *** [kernel/start.o] Error 1

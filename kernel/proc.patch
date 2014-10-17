@@ -1,0 +1,91 @@
+--- proc.c	2010-09-30 15:28:58.000000000 +0800
++++ ../kernel/proc.c	2010-09-30 15:24:30.000000000 +0800
+@@ -1,8 +1,8 @@
+-                                            
++
+ /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-			proc.c	2010,7,9
++                               proc.c
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-				Mephisto
++                                                    Forrest Yu, 2005
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+ 
+ #include "type.h"
+@@ -23,17 +23,17 @@
+ PRIVATE int  msg_receive(struct proc* current, int src, MESSAGE* m);
+ PRIVATE int  deadlock(int src, int dest);
+ 
+-/*=============================================================================*
+-                              schedule
+- ==============================================================================
+- =
+- <Ring 0> Choose one proc to run.
+- =
+-==============================================================================*/
++/*****************************************************************************
++ *                                schedule
++ *****************************************************************************/
++/**
++ * <Ring 0> Choose one proc to run.
++ * 
++ *****************************************************************************/
+ PUBLIC void schedule()
+ {
+-	struct proc* 	p;
+-	int	 	greatest_ticks = 0;
++	struct proc*	p;
++	int		greatest_ticks = 0;
+ 
+ 	while (!greatest_ticks) {
+ 		for (p = &FIRST_PROC; p <= &LAST_PROC; p++) {
+@@ -42,11 +42,11 @@
+ 					greatest_ticks = p->ticks;
+ 					p_proc_ready = p;
+ 				}
+-			}	
++			}
+ 		}
+ 
+-		if (!greatest_ticks) 
+-			for (p = &FIRST_PROC; p < &LAST_PROC; p++)
++		if (!greatest_ticks)
++			for (p = &FIRST_PROC; p <= &LAST_PROC; p++)
+ 				if (p->p_flags == 0)
+ 					p->ticks = p->priority;
+ 	}
+@@ -181,7 +181,7 @@
+ 	u32 seg_base = ldt_seg_linear(p, INDEX_LDT_RW);
+ 	u32 la = seg_base + (u32)va;
+ 
+-	if (pid < NR_TASKS + NR_PROCS) {
++	if (pid < NR_TASKS + NR_NATIVE_PROCS) {
+ 		assert(la == (u32)va);
+ 	}
+ 
+@@ -267,7 +267,8 @@
+ 				return 1;
+ 			}
+ 			p = proc_table + p->p_sendto;
+-		}else{
++		}
++		else {
+ 			break;
+ 		}
+ 	}
+@@ -586,13 +587,13 @@
+ 	sprintf(info, "ldt_sel: 0x%x.  ", p->ldt_sel); disp_color_str(info, text_color);
+ 	sprintf(info, "ticks: 0x%x.  ", p->ticks); disp_color_str(info, text_color);
+ 	sprintf(info, "priority: 0x%x.  ", p->priority); disp_color_str(info, text_color);
+-	/*sprintf(info, "pid: 0x%x.  ", p->pid); disp_color_str(info, text_color);*/
++	/* sprintf(info, "pid: 0x%x.  ", p->pid); disp_color_str(info, text_color); */
+ 	sprintf(info, "name: %s.  ", p->name); disp_color_str(info, text_color);
+ 	disp_color_str("\n", text_color);
+ 	sprintf(info, "p_flags: 0x%x.  ", p->p_flags); disp_color_str(info, text_color);
+ 	sprintf(info, "p_recvfrom: 0x%x.  ", p->p_recvfrom); disp_color_str(info, text_color);
+ 	sprintf(info, "p_sendto: 0x%x.  ", p->p_sendto); disp_color_str(info, text_color);
+-	/*sprintf(info, "nr_tty: 0x%x.  ", p->nr_tty); disp_color_str(info, text_color);*/
++	/* sprintf(info, "nr_tty: 0x%x.  ", p->nr_tty); disp_color_str(info, text_color); */
+ 	disp_color_str("\n", text_color);
+ 	sprintf(info, "has_int_msg: 0x%x.  ", p->has_int_msg); disp_color_str(info, text_color);
+ }
