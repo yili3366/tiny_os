@@ -15,7 +15,7 @@ OBJCOPY			= objcopy
 DASM			= objdump
 ASBFLAGS		= -I boot/include/
 ASKFLAGS		= -I include/ -I include/sys/
-CFLAGS			= -I include/ -I include/sys/ -c -fno-builtin
+CFLAGS			= -I include/ -I include/sys/ -c -fno-builtin -fno-stack-protector
 TRIM_FLAGS		=-R .pdr -R .comment -R .note -S -O binary
 DASMFLAGS		= -D
 
